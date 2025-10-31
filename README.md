@@ -1,7 +1,5 @@
 # Vision_Projects
 
-# Vision_Projects
-
 ## About
 This repository contains various computer vision projects implemented in Python. The projects focus on deep learning, object detection, and image processing, including implementations of models from scratch.
 
