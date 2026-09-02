@@ -1,16 +1,15 @@
+from Loss_F import YOLO_LOSS
+from Model import YOLO_V1, CNN_Block
+from dataset import VOCDataset
+from utils import load_checkpoint, get_bboxes, mean_average_precision
+from tqdm import tqdm
+
 import torch
 import torchvision
-
-from Loss_F import *
-from utils import *
-from Model import *
-from dataset import *
-
 import torchvision.transforms as transforms
 import torch.optim as optim
 import torchvision.transforms.functional as FT
 
-from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 
@@ -36,8 +35,8 @@ NUM_WORKERS = 2
 PIN_MEMORY = True
 LOAD_MODEL = False
 LOAD_MODEL_FILE = "overfit.pth.tar"
-IMG_DIR = r"data/images" 
-LABEL_DIR = r"data/labels"
+IMG_DIR = "./data/images" 
+LABEL_DIR = "./data/labels"
 
 
 class compose(object):
