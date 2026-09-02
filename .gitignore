@@ -1,0 +1,10 @@
+*/.vscode/
+*/__pycache__
+
+.vscode/
+__pycache__
+
+YOLO_V1_from-sratch/data/
+YOLO_V1_from-sratch/logs/
+
+
