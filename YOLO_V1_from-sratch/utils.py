@@ -2,7 +2,10 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+
 from collections import Counter
+from tqdm import tqdm
+
 
 def intersection_over_union(boxes_preds, boxes_labels, box_format="midpoint"):
     """
@@ -347,3 +350,25 @@ def load_checkpoint(checkpoint, model, optimizer):
     print("=> Loading checkpoint")
     model.load_state_dict(checkpoint["state_dict"])
     optimizer.load_state_dict(checkpoint["optimizer"])
+
+
+def train_fn(train_loader, model, optimizer, loss_fn, device):
+    loop = tqdm(train_loader, leave=True)
+    mean_loss = []
+
+    for batch_idx, (x, y) in enumerate(loop):
+        x, y = x.to(device), y.to(device)
+        out = model(x)
+        loss = loss_fn(out, y)
+        mean_loss.append(loss.item())
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        # update progress bar
+        loop.set_postfix(loss=loss.item())
+
+    print(f"Mean loss was {sum(mean_loss)/len(mean_loss)}")
+
+
+

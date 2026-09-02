@@ -5,6 +5,6 @@
 __pycache__
 
 YOLO_V1_from-sratch/data/
-YOLO_V1_from-sratch/logs/
+YOLO_V1_from-sratch/split_ratio/
 
 
