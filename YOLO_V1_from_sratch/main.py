@@ -17,11 +17,11 @@ from utils import load_checkpoint, get_bboxes, mean_average_precision, train_fn
 
 
 # Hyperparameters 
-DATASET_EX_DIR = "./YOLO_V1_from-sratch/data/100examples.csv"
-IMG_DIR = "./YOLO_V1_from-sratch/data/images" 
-LABEL_DIR = "./YOLO_V1_from-sratch/data/labels"
+DATASET_EX_DIR = "./YOLO_V1_from_sratch/data/100examples.csv"
+IMG_DIR = "./YOLO_V1_from_sratch/data/images" 
+LABEL_DIR = "./YOLO_V1_from_sratch/data/labels"
 
-TEST_PATH = "./YOLO_V1_from-sratch/split_ratio/test.csv"
+TEST_PATH = "./YOLO_V1_from_sratch/split_ratio/test.csv"
 LOAD_MODEL_FILE = "./YOLO_V1_from_sratch/overfit.pth.tar"
 
 LEARNING_RATE = 2e-5
