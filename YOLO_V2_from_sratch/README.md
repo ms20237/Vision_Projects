@@ -56,7 +56,7 @@ YOLO_V2_from_sratch/
 │   └── train_config.yaml          # Configuration file for training
 ├── data/                          # Dataset directory (created by user)
 │   ├── create_dataset.py          # Dataset creation script
-│   └──  generate_csv.py            # Generate CSV of dataset ratio
+│   └── generate_csv.py            # Generate CSV of dataset ratio
 ├── dataset.py                     # VOC dataset loader with YOLOv2 target format
 ├── loss_f.py                      # YOLOv2 loss function implementation
 ├── main.py                        # Training script entry point
