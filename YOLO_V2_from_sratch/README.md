@@ -55,17 +55,14 @@ YOLO_V2_from_sratch/
 ├── configs/
 │   └── train_config.yaml          # Configuration file for training
 ├── data/                          # Dataset directory (created by user)
-│   ├── images/                    # Training images
-│   ├── labels/                    # Label files (.txt)
-│   └── test/                      # Test images (optional)
+│   ├── create_dataset.py          # Dataset creation script
+│   └──  generate_csv.py            # Generate CSV of dataset ratio
 ├── dataset.py                     # VOC dataset loader with YOLOv2 target format
 ├── loss_f.py                      # YOLOv2 loss function implementation
 ├── main.py                        # Training script entry point
 ├── model.py                       # YOLO V2 Darknet-19 architecture
 ├── utils.py                       # Utilities (IoU, NMS, mAP, multi-scale, checkpointing)
 ├── intersection_Over_Union.py     # IoU calculation
-├── create_dataset.py              # Dataset creation script
-├── generate_csv.py                # Generate CSV annotations
 └── README.md
 ```
 
