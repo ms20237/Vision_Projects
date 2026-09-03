@@ -119,27 +119,25 @@ data/
 Create a `configs/train_config.yaml` file with your settings:
 
 ```yaml
-# Dataset paths
-img_dir: "data/images"
-label_dir: "data/labels"
-test_path: "data/test.csv"
-dataset_ex_dir: "data/train.csv"
+# train_config.yaml
 
-# Training parameters
-lr: 0.001
-batch_size: 16
-epochs: 100
-weight_decay: 0.0005
+train_config_path: "./YOLO_V1_from-sratch/configs/train_config.yaml"
+img_dir: "./YOLO_V1_from-sratch/data/images"
+label_dir: "./YOLO_V1_from-sratch/data/labels"
+test_path: "./YOLO_V1_from-sratch/split_ratio/test.csv"
+dataset_ex_dir: "./YOLO_V1_from-sratch/data/100examples.csv"
 
-# System settings
+load_model_file: "./YOLO_V1_from-sratch/overfit.pth.tar"
+
+lr: 0.00002
 device: "cuda"
-n_works: 4
-pin_memory: True
-seed: 42
-
-# Model loading (optional)
-load_model: False
-load_model_file: "checkpoint.pth.tar"
+batch_size: 16
+epochs: 10
+n_works: 2
+seed: 123
+load_model: false
+weight_decay: 0.0
+pin_memory: true
 ```
 
 ---
