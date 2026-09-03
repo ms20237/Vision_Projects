@@ -274,6 +274,6 @@ plot_image(image, nms_boxes)
 ## 📝 License
 
 This project is licensed under the [MIT License](https://choosealicense.com/licenses/mit/).
----
+
 
 **Happy Detecting!** 🎯
