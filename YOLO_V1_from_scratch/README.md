@@ -54,8 +54,6 @@ This repository provides a complete, modular implementation including data loadi
 YOLO_V1_from_sratch/
 ├── configs/
 │   └── train_config.yaml          # Configuration file for training
-├── data/                          # Dataset directory (created by user)
-├── dataset.py                     # VOC dataset loader
 ├── loss_f.py                      # YOLO loss function implementation
 ├── main.py                        # Training script entry point
 ├── model.py                       # YOLO V1 model architecture
@@ -122,10 +120,10 @@ Create a `configs/train_config.yaml` file with your settings:
 # train_config.yaml
 
 train_config_path: "./YOLO_V1_from-sratch/configs/train_config.yaml"
-img_dir: "./YOLO_V1_from-sratch/data/images"
-label_dir: "./YOLO_V1_from-sratch/data/labels"
-test_path: "./YOLO_V1_from-sratch/split_ratio/test.csv"
-dataset_ex_dir: "./YOLO_V1_from-sratch/data/100examples.csv"
+img_dir: "./data/images"
+label_dir: "./data/labels"
+test_path: "./data/test.csv"
+dataset_ex_dir: "./data/100examples.csv"
 
 load_model_file: "./YOLO_V1_from-sratch/overfit.pth.tar"
 

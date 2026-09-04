@@ -54,10 +54,6 @@ This repository provides a complete, modular implementation including data loadi
 YOLO_V2_from_sratch/
 ├── configs/
 │   └── train_config.yaml          # Configuration file for training
-├── data/                          # Dataset directory (created by user)
-│   ├── create_dataset.py          # Dataset download and creation script
-│   └── generate_csv.py            # Generate CSV of dataset ratio
-├── dataset.py                     # VOC dataset loader with YOLOv2 target format
 ├── loss_f.py                      # YOLOv2 loss function implementation
 ├── main.py                        # Training script entry point
 ├── model.py                       # YOLO V2 Darknet-19 architecture
@@ -123,10 +119,10 @@ Create a `configs/train_config.yaml` file with your settings:
 # train_config.yaml
 
 train_config_path: "./YOLO_V2_from-sratch/configs/train_config.yaml"
-img_dir: "./YOLO_V2_from-sratch/data/images"
-label_dir: "./YOLO_V2_from-sratch/data/labels"
-test_path: "./YOLO_V2_from-sratch/split_ratio/test.csv"
-dataset_ex_dir: "./YOLO_V2_from-sratch/data/100examples.csv"
+img_dir: "./data/images"
+label_dir: "./data/labels"
+test_path: "./data/test.csv"
+dataset_ex_dir: "./data/100examples.csv"
 
 load_model_file: "./YOLO_V2_from-sratch/overfit.pth.tar"
 
