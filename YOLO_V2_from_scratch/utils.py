@@ -99,9 +99,7 @@ def non_max_suppression(bboxes, iou_threshold, threshold, box_format="corners"):
     return bboxes_after_nms
 
 
-def mean_average_precision(
-    pred_boxes, true_boxes, iou_threshold=0.5, box_format="midpoint", num_classes=20
-):
+def mean_average_precision(pred_boxes, true_boxes, iou_threshold=0.5, box_format="midpoint", num_classes=20):
     """
     Calculates mean average precision. Unchanged from YOLOv1 -- this
     operates on flat box lists, independent of grid size or anchor count.

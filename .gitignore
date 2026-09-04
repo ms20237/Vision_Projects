@@ -4,12 +4,12 @@
 .vscode/
 __pycache__
 
-YOLO_V1_from-sratch/data/
-YOLO_V1_from-sratch/split_ratio/
+YOLO_V1_from-scratch/data/
+YOLO_V1_from-scratch/split_ratio/
 
-YOLO_V2_from-sratch/data/
-YOLO_V2_from-sratch/split_ratio/
+YOLO_V2_from-scratch/data/
+YOLO_V2_from-scratch/split_ratio/
 
-YOLO_V1_from_sratch/data/get_data
-YOLO_V2_from_sratch/data/get_data
+YOLO_V1_from_scratch/data/get_data
+YOLO_V2_from_scratch/data/get_data
 
