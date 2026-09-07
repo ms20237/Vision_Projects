@@ -58,6 +58,7 @@ YOLO_V1_from_sratch/
 ├── main.py                        # Training script entry point
 ├── model.py                       # YOLO V1 model architecture
 ├── utils.py                       # Utilities (IoU, NMS, mAP, checkpointing)
+├── daatset.py                     # dataset class for VOCDataset 
 └── intersection_Over_Union.py     # IoU calculation
 ```
 

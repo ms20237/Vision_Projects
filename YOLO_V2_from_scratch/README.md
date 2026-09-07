@@ -58,8 +58,8 @@ YOLO_V2_from_sratch/
 ├── main.py                        # Training script entry point
 ├── model.py                       # YOLO V2 Darknet-19 architecture
 ├── utils.py                       # Utilities (IoU, NMS, mAP, multi-scale, checkpointing)
-├── intersection_Over_Union.py     # IoU calculation
-└── README.md
+├── daatset.py                     # dataset class for VOCDataset 
+└── intersection_Over_Union.py     # IoU calculation
 ```
 
 ---
