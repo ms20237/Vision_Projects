@@ -123,7 +123,7 @@ label_dir: "./data/labels"
 test_path: "./data/test.csv"
 dataset_ex_dir: "./data/100examples.csv"
 
-load_model_file: "./YOLO_V1_from-sratch/overfit.pth.tar"
+load_model_file: "./YOLO_V1_from-sratch/models/overfit.pth.tar"
 
 lr: 0.00002
 device: "cuda"
