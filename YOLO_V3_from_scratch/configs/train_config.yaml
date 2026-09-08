@@ -1,12 +1,12 @@
 # train_config.yaml
 
-train_config_path: "./YOLO_V3_from-sratch/configs/train_config.yaml"
+train_config_path: "./YOLO_V3_from-scratch/configs/train_config.yaml"
 img_dir: "./data/images"
 label_dir: "./data/labels"
 test_path: "./split_ratio/test.csv"
 train_path: "./data/100examples.csv"
 
-load_model_file: "./YOLO_V1_from-sratch/overfit.pth.tar"
+load_model_file: "./YOLO_V1_from-scratch/models/overfit.pth.tar"
 
 lr: 0.00002
 device: "cuda"
