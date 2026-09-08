@@ -18,7 +18,7 @@ from utils import load_checkpoint, get_bboxes, mean_average_precision, train_fn
 
 
 # Default Hyperparameters 
-DEFAULT_CONFIG_PATH = "./YOLO_V1_from_sratch/configs/train_config.yaml"
+DEFAULT_CONFIG_PATH = "./YOLO_V1_from_scratch/configs/train_config.yaml"
 
 
 def load_yaml_config(config_path):

@@ -15,7 +15,7 @@ from utils import load_checkpoint, get_bboxes, mean_average_precision, train_fn,
 
 
 # Default Hyperparameters
-DEFAULT_CONFIG_PATH = "./YOLO_V3_from_sratch/configs/train_config.yaml"
+DEFAULT_CONFIG_PATH = "./YOLO_V3_from_scratch/configs/train_config.yaml"
 
 # 416 is the standard YOLOv3 base resolution; the 3 output grids
 # (13x13, 26x26, 52x52) and the pixel-unit anchors in COCO_ANCHORS are
