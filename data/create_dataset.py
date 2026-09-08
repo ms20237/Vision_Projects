@@ -30,7 +30,7 @@ def init():
     parser.add_argument('--voc_root', 
                         type=str, 
                         required=True, 
-                        help='Path to VOC2012 folder (e.g., ./data/VOCdevkit/VOC2012)')
+                        help='Path to VOC2012 folder (e.g., ./data/VOCdevkit/VOC2012) or root folder (e.g., ./data)')
     
     parser.add_argument('--output_dir', 
                         type=str, 
@@ -148,23 +148,126 @@ def validate_voc_dataset(voc_root_path):
     return True
 
 
+def find_voc_root(voc_root_path):
+    """
+    Find the actual VOC2012 directory from the given path
+    
+    Args:
+        voc_root_path: Path that may be root, VOCdevkit, or VOC2012
+    
+    Returns:
+        Path to VOC2012 directory
+    """
+    path = Path(voc_root_path)
+    
+    # If path points directly to VOC2012
+    if path.name == "VOC2012" and (path / "Annotations").exists():
+        return path
+    
+    # If path points to VOCdevkit
+    if path.name == "VOCdevkit":
+        voc2012_path = path / "VOC2012"
+        if voc2012_path.exists():
+            return voc2012_path
+        return path
+    
+    # If path is root (like ./data), check for VOCdevkit/VOC2012
+    voc2012_path = path / "VOCdevkit" / "VOC2012"
+    if voc2012_path.exists():
+        return voc2012_path
+    
+    # If path might be root and VOCdevkit exists but no VOC2012
+    vocdevkit_path = path / "VOCdevkit"
+    if vocdevkit_path.exists():
+        # Return VOCdevkit path, will be handled in run()
+        return vocdevkit_path
+    
+    # Return original path
+    return path
+
+
+def safe_delete_directory(path):
+    """
+    Safely delete a directory with confirmation
+    
+    Args:
+        path: Path to delete
+        
+    Returns:
+        bool: True if deleted, False if skipped
+    """
+    path = Path(path)
+    
+    if not path.exists():
+        return True
+    
+    # Safety checks - never delete root or dangerous paths
+    dangerous_paths = ['/', '/home', '/Users', 'C:\\', 'C:/', '.', '']
+    if str(path) in dangerous_paths or str(path.resolve()) in dangerous_paths:
+        print(f"ERROR: Refusing to delete dangerous path: {path}")
+        return False
+    
+    # Safety check for common data directories
+    if len(str(path)) < 5:  # Very short path
+        print(f"ERROR: Refusing to delete path with short name: {path}")
+        return False
+    
+    # Ask for confirmation if not in non-interactive mode
+    response = input(f"WARNING: About to delete {path}. Continue? (yes/no): ")
+    if response.lower() != 'yes':
+        print("Deletion cancelled")
+        return False
+    
+    try:
+        shutil.rmtree(path)
+        print(f"Deleted: {path}")
+        return True
+    except Exception as e:
+        print(f"Error deleting {path}: {e}")
+        return False
+
+
 def run(voc_root_path, output_dir, download=True, validate=True):
     """
     Prepare Pascal VOC dataset for YOLO training
     
     Args:
-        voc_root_path: Path to VOCdevkit/VOC2012 folder
+        voc_root_path: Path to VOCdevkit/VOC2012 folder or root folder
         output_dir: Where to save CSV files
         download: Whether to download dataset if not found
         validate: Whether to validate dataset structure
     """
-    voc_root = Path(voc_root_path)
+    # Find the actual VOC root
+    original_path = Path(voc_root_path)
+    voc_root = find_voc_root(voc_root_path)
+    
+    print(f"Looking for VOC dataset at: {voc_root}")
     
     # Check if VOC dataset exists, download if not
-    if not voc_root.exists() and download:
+    if not (voc_root / "Annotations").exists() and download:
         print(f"VOC dataset not found at {voc_root}. Downloading...")
-        voc_root = download_voc_dataset(Path(output_dir).parent)
+        
+        # Determine where to download to
+        if original_path.name in ["VOC2012", "VOCdevkit"]:
+            # If user specified VOC2012 or VOCdevkit, download to parent
+            download_dir = original_path.parent
+        else:
+            # Otherwise download to the specified root
+            download_dir = original_path
+        
+        voc_root = download_voc_dataset(download_dir)
         voc_root_path = str(voc_root)
+    
+    # If download was skipped or failed, check if we need to handle VOCdevkit path
+    if not (voc_root / "Annotations").exists():
+        # Check if we have VOCdevkit but not VOC2012
+        if (voc_root / "VOC2012" / "Annotations").exists():
+            voc_root = voc_root / "VOC2012"
+            voc_root_path = str(voc_root)
+        else:
+            print(f"ERROR: Could not find VOC dataset at {voc_root_path}")
+            print("Please ensure the dataset is properly structured or use --no_download")
+            return
     
     # Validate dataset structure
     if validate:
@@ -173,10 +276,24 @@ def run(voc_root_path, output_dir, download=True, validate=True):
         except ValueError as e:
             print(f"Error: {e}")
             if download:
-                print("Attempting to re-download dataset...")
-                shutil.rmtree(voc_root.parent if 'VOCdevkit' in str(voc_root) else voc_root)
-                voc_root = download_voc_dataset(Path(output_dir).parent)
-                voc_root_path = str(voc_root)
+                print("Attempting to fix dataset...")
+                # Safely delete only the VOCdevkit directory if it exists
+                delete_path = Path(voc_root_path)
+                if 'VOCdevkit' in str(delete_path):
+                    # Delete the specific VOC2012 folder, not the entire data
+                    delete_path = Path(voc_root_path)
+                    if safe_delete_directory(delete_path):
+                        # Download fresh dataset
+                        download_dir = delete_path.parent.parent if 'VOCdevkit' in str(delete_path.parent) else delete_path.parent
+                        voc_root = download_voc_dataset(download_dir)
+                        voc_root_path = str(voc_root)
+                    else:
+                        raise
+                else:
+                    # If it's not VOCdevkit, we need to be careful
+                    print(f"ERROR: Cannot automatically fix - unexpected path structure: {voc_root_path}")
+                    print("Please check the dataset structure manually")
+                    raise
             else:
                 raise
     
@@ -191,6 +308,10 @@ def run(voc_root_path, output_dir, download=True, validate=True):
     }
     
     image_sets_dir = Path(voc_root_path) / 'ImageSets' / 'Main'
+    
+    if not image_sets_dir.exists():
+        print(f"ERROR: ImageSets directory not found at {image_sets_dir}")
+        return
     
     for split_name, split_file in splits.items():
         split_file_path = image_sets_dir / split_file
