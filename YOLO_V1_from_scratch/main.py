@@ -137,7 +137,7 @@ def init():
         'load_model_file': args.load_model_file if args.load_model_file is not None 
                            else yaml_config.get('load_model_file'),
         'test_path': yaml_config.get('test_path'),
-        'dataset_ex_dir': yaml_config.get('dataset_ex_dir'),
+        'train_path': yaml_config.get('train_path'),
         'weight_decay': yaml_config.get('weight_decay'),
         'pin_memory': yaml_config.get('pin_memory'),
     }
@@ -170,7 +170,7 @@ def main(img_dir: str,
          load_model: bool,
          load_model_file: str,
          test_path: str,
-         dataset_ex_dir: str,
+         train_path: str,
          weight_decay: float,
          pin_memory: bool):
     """
@@ -194,7 +194,7 @@ def main(img_dir: str,
         print(f"Loaded model from {load_model_file}")
 
     train_dataset = VOCDataset(
-        dataset_ex_dir,
+        train_path,
         transform=transform,
         img_dir=img_dir,
         label_dir=label_dir
@@ -269,7 +269,7 @@ if __name__ == "__main__":
         load_model=args.load_model,
         load_model_file=args.load_model_file,
         test_path=args.test_path,
-        dataset_ex_dir=args.dataset_ex_dir,
+        train_path=args.train_path,
         weight_decay=args.weight_decay,
         pin_memory=args.pin_memory,
     )
