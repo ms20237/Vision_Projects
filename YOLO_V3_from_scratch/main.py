@@ -204,14 +204,6 @@ def main(img_dir: str,
         load_checkpoint(torch.load(load_model_file), model, optimizer)
         print(f"Loaded model from {load_model_file}")
 
-    # NOTE: VOCDataset (not included with the uploaded files) needs to
-    # return (image_tensor, boxes) per item, where `boxes` is a plain list
-    # of (class_idx, x, y, w, h) tuples in whole-image-relative [0, 1]
-    # units -- NOT a pre-gridded target tensor. Binning into the 3
-    # scale-specific grids happens on the fly via utils.build_targets_v3
-    # (called from train_fn/get_bboxes), since with multi-scale training
-    # the right grid size isn't fixed ahead of time. See loss_f.py's
-    # module docstring for the exact target format this feeds into.
     train_dataset = VOCDataset(
         train_path,
         transform=transform,
