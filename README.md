@@ -16,16 +16,21 @@ This repository contains various computer vision projects implemented in Python.
    ```bash
    git clone https://github.com/ms20237/Vision_Projects.git
    ```
-2. Navigate into the project you want to run:
+2. Install with:
+   ```bash
+   pip install -r requirements.txt
+   ``` 
+  All five YOLO implementations in this repo.   
+3. Navigate into the project you want to run:
    ```bash
    cd Vision_Projects/YOLO_Vx_from_scratch
    ```
    (options: `YOLO_V1_from_scratch` / `YOLO_V2_from_scratch` / `YOLO_V3_from_scratch` / `YOLO_V4_from_scratch` / `YOLO_V5_from_scratch`)
-3. Install the shared dependencies:
+4. Install the shared dependencies:
    ```bash
    pip install torch torchvision pandas pillow matplotlib numpy pyyaml tqdm
    ```
-4. Refer to that project's own `README.md` for dataset preparation, configuration, and training instructions specific to that YOLO version.
+5. Refer to that project's own `README.md` for dataset preparation, configuration, and training instructions specific to that YOLO version.
 
 ## Repository Structure
 ```
