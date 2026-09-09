@@ -5,7 +5,7 @@ A PyTorch implementation of the **YOLO (You Only Look Once) V2** object detectio
 This repository provides a complete, modular implementation including data loading, model architecture (Darknet-19), custom loss function with anchor boxes, training pipeline with multi-scale training, and evaluation metrics.
 
 <p align="center">
-  <img src="image/model.png" alt="YOLO V1 Model Architecture" width="900"/>
+  <img src="image/model.png" alt="YOLO V1 Model Architecture" width="700"/>
 </p>
 
 <p align="center">
