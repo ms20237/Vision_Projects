@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="image/model.png" alt="YOLO V1 Model Architecture" width="700"/>
+  <img src="image/model.png" alt="YOLO V1 Model Architecture" width="600"/>
 </p>
 
 <p align="center">
