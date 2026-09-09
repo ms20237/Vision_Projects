@@ -1,5 +1,21 @@
 # YOLO V3 from Scratch
 
+<p align="center">
+  <img src="image/intro.png" alt="YOLO V1 Introduction" width="600"/>
+</p>
+
+<p align="center">
+  <em>Overview of the YOLO V1 object detection approach.</em>
+</p>
+
+<p align="center">
+  <img src="image/model.png" alt="YOLO V1 Model Architecture" width="700"/>
+</p>
+
+<p align="center">
+  <em>YOLO V1 model architecture and layer structure.</em>
+</p>
+
 A PyTorch implementation of **YOLOv3**, built from the ground up, following the original paper ["YOLOv3: An Incremental Improvement"](https://arxiv.org/abs/1804.02767) by Joseph Redmon and Ali Farhadi.
 
 This repository provides a complete, modular implementation including data loading, model architecture (Darknet-53 with an FPN-style multi-scale head), a custom multi-scale loss function with anchor boxes, a training pipeline with multi-scale training, and evaluation metrics.
