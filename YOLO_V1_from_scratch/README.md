@@ -1,5 +1,21 @@
 # YOLO V1 from Scratch
 
+<p align="center">
+  <img src="image/intro.png" alt="YOLO V1 Introduction" width="800"/>
+</p>
+
+<p align="center">
+  <em>Overview of the YOLO V1 object detection approach.</em>
+</p>
+
+<p align="center">
+  <img src="image/model_structure.png" alt="YOLO V1 Model Architecture" width="900"/>
+</p>
+
+<p align="center">
+  <em>YOLO V1 model architecture and layer structure.</em>
+</p>
+
 A PyTorch implementation of the **YOLO (You Only Look Once) V1** object detection model built from the ground up, following the original paper ["You Only Look Once: Unified, Real-Time Object Detection"](https://arxiv.org/abs/1506.02640) by Joseph Redmon et al.
 
 This repository provides a complete, modular implementation including data loading, model architecture, custom loss function, training pipeline, and evaluation metrics.
