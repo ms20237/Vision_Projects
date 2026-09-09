@@ -1,5 +1,21 @@
 # YOLO V4 from Scratch
 
+<p align="center">
+  <img src="image/intro.png" alt="YOLO V4 Introduction" width="600"/>
+</p>
+
+<p align="center">
+  <em>Overview of the YOLO V1 object detection approach.</em>
+</p>
+
+<p align="center">
+  <img src="image/model.png" alt="YOLO V4 Model Architecture" width="600"/>
+</p>
+
+<p align="center">
+  <em>YOLO V1 model architecture and layer structure.</em>
+</p>
+
 A PyTorch implementation of **YOLOv4**, built from the ground up, following the original paper ["YOLOv4: Optimal Speed and Accuracy of Object Detection"](https://arxiv.org/abs/2004.10934) by Alexey Bochkovskiy, Chien-Yao Wang, and Hong-Yuan Mark Liao.
 
 This repository provides a complete, modular implementation including data loading, model architecture (CSPDarknet53 with an SPP + PANet multi-scale head), a custom multi-scale loss function with CIoU box regression, a training pipeline with multi-scale training, and evaluation metrics.
