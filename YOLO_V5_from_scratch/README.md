@@ -1,7 +1,7 @@
 # YOLO V5 from Scratch
 
 <p align="center">
-  <img src="image/overview.png" alt="YOLO V5 Overview" width="600"/>
+  <img src="image/overview.jpg" alt="YOLO V5 Overview" width="600"/>
 </p>
 
 <p align="center">
