@@ -1,19 +1,19 @@
 # YOLO V3 from Scratch
 
 <p align="center">
-  <img src="image/intro.png" alt="YOLO V1 Introduction" width="600"/>
+  <img src="image/intro.png" alt="YOLO V3 Introduction" width="600"/>
 </p>
 
 <p align="center">
-  <em>Overview of the YOLO V1 object detection approach.</em>
+  <em>Overview of the YOLO V3 object detection approach.</em>
 </p>
 
 <p align="center">
-  <img src="image/model.png" alt="YOLO V1 Model Architecture" width="600"/>
+  <img src="image/model.png" alt="YOLO V3 Model Architecture" width="600"/>
 </p>
 
 <p align="center">
-  <em>YOLO V1 model architecture and layer structure.</em>
+  <em>YOLO V3 model architecture and layer structure.</em>
 </p>
 
 A PyTorch implementation of **YOLOv3**, built from the ground up, following the original paper ["YOLOv3: An Incremental Improvement"](https://arxiv.org/abs/1804.02767) by Joseph Redmon and Ali Farhadi.

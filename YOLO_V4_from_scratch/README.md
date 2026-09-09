@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <em>Overview of the YOLO V1 object detection approach.</em>
+  <em>Overview of the YOLO V4 object detection approach.</em>
 </p>
 
 <p align="center">
@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <em>YOLO V1 model architecture and layer structure.</em>
+  <em>YOLO V4 model architecture and layer structure.</em>
 </p>
 
 A PyTorch implementation of **YOLOv4**, built from the ground up, following the original paper ["YOLOv4: Optimal Speed and Accuracy of Object Detection"](https://arxiv.org/abs/2004.10934) by Alexey Bochkovskiy, Chien-Yao Wang, and Hong-Yuan Mark Liao.
