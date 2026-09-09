@@ -20,7 +20,6 @@ This repository contains various computer vision projects implemented in Python.
    ```bash
    pip install -r requirements.txt
    ``` 
-  All five YOLO implementations in this repo.   
 3. Navigate into the project you want to run:
    ```bash
    cd Vision_Projects/YOLO_Vx_from_scratch
