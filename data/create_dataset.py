@@ -45,7 +45,10 @@ Examples:
     return parser.parse_args()
 
 
+# ----------------------------------------------------------------------------
 # Downloading (resume + retry + ETA)
+# ----------------------------------------------------------------------------
+
 def get_remote_size(url):
     """Return file size in bytes from a HEAD request, or None if unknown."""
     try:
@@ -57,26 +60,36 @@ def get_remote_size(url):
         return None
 
 
-def download_file(url, output_path, description="Downloading", max_retries=200):
+def download_file(url, output_path, description="Downloading", max_retries=50):
     """
-    Download a file, resuming from a .part file after any interruption.
-    Retries until the download is complete. The final filename only appears
-    once the download is fully finished, so a truncated file can never be
-    mistaken for a complete one.
+    Download a file with automatic resume.
+
+    - Data is written to "<name>.part". If the download drops mid-way, or you
+      press Ctrl+C, the .part file is kept.
+    - Running again with the SAME output path continues from where it stopped.
+    - Connection drops are retried automatically. The retry counter resets
+      whenever new data arrives, so only repeated failures with NO progress
+      count towards max_retries.
+    - The final filename only appears when the download is fully complete.
     """
     output_path = Path(output_path)
     part_path = output_path.with_name(output_path.name + ".part")
     remote_size = get_remote_size(url)
+    failures = 0
 
-    for attempt in range(1, max_retries + 1):
+    while True:
+        done = part_path.stat().st_size if part_path.exists() else 0
+        start_size = done
         try:
-            done = part_path.stat().st_size if part_path.exists() else 0
-
             if remote_size and done > remote_size:      # bad partial file -> restart
                 part_path.unlink()
-                done = 0
+                done = start_size = 0
             if remote_size and done == remote_size:     # already fully downloaded
                 break
+
+            if done:
+                pct = f" ({done / remote_size:.0%})" if remote_size else ""
+                print(f"Resuming from {done / 1024 / 1024:.1f} MB{pct}...")
 
             req = urllib.request.Request(url)
             if done:
@@ -84,6 +97,7 @@ def download_file(url, output_path, description="Downloading", max_retries=200):
 
             with urllib.request.urlopen(req, timeout=30) as resp:
                 if done and resp.status != 206:         # server ignored Range -> restart
+                    print("Server does not support resume; restarting from the beginning.")
                     done = 0
                 length = int(resp.headers.get("Content-Length", 0))
                 total = (done + length) if length else remote_size
@@ -101,19 +115,27 @@ def download_file(url, output_path, description="Downloading", max_retries=200):
 
             size = part_path.stat().st_size
             if total and size < total:
-                raise IOError(f"Incomplete download ({size}/{total} bytes)")
+                raise IOError(f"Connection closed early ({size}/{total} bytes)")
             break  # success
 
-        except urllib.error.HTTPError as e:
-            if e.code in (401, 403, 404):
-                raise RuntimeError(f"HTTP {e.code} for {url}: not retrying") from e
-            print(f"\nAttempt {attempt}/{max_retries} failed: {e}. Resuming in 5s...")
-            time.sleep(5)
+        except KeyboardInterrupt:
+            print("\nDownload paused. Run the same command again to resume from where it stopped.")
+            raise
+
         except (urllib.error.URLError, OSError, TimeoutError, http.client.HTTPException) as e:
-            print(f"\nAttempt {attempt}/{max_retries} failed: {e}. Resuming in 5s...")
+            if isinstance(e, urllib.error.HTTPError):
+                if e.code in (401, 403, 404):
+                    raise RuntimeError(f"HTTP {e.code} for {url}: not retrying") from e
+                if e.code == 416 and done:
+                    break   # range beyond end of file: .part is already complete
+
+            now = part_path.stat().st_size if part_path.exists() else 0
+            failures = 0 if now > start_size else failures + 1   # progress resets the counter
+            if failures >= max_retries:
+                raise RuntimeError(f"Failed to download {url}: no progress after {max_retries} retries") from e
+            print(f"\nDownload interrupted ({e}). Retrying in 5s and resuming "
+                  f"from {now / 1024 / 1024:.1f} MB... (retry {failures}/{max_retries})")
             time.sleep(5)
-    else:
-        raise RuntimeError(f"Failed to download {url} after {max_retries} attempts")
 
     part_path.replace(output_path)
 
@@ -202,7 +224,10 @@ def download_voc_dataset(output_dir="./data"):
     return voc_root
 
 
+# ----------------------------------------------------------------------------
 # Dataset validation / path helpers
+# ----------------------------------------------------------------------------
+
 def validate_voc_dataset(voc_root_path):
     """Validate that the VOC dataset is properly structured"""
     for dir_name in ['Annotations', 'ImageSets', 'JPEGImages']:
@@ -279,7 +304,10 @@ def safe_delete_directory(path):
         return False
 
 
+# ----------------------------------------------------------------------------
 # Main pipeline
+# ----------------------------------------------------------------------------
+
 def run(voc_root_path, output_dir, download=True, validate=True):
     """
     Prepare Pascal VOC dataset for YOLO training
