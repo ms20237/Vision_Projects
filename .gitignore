@@ -4,6 +4,8 @@
 .vscode/
 __pycache__
 
+data/VOCdevkit
+
 YOLO_V1_from-scratch/data/
 YOLO_V1_from-scratch/split_ratio/
 
