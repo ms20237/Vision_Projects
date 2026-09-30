@@ -36,7 +36,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from intersection_Over_Union import intersection_over_union
+from utils import intersection_over_union
 
 
 class YOLO_V2_LOSS(nn.Module):
