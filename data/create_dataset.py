@@ -7,6 +7,7 @@ import urllib.request
 import urllib.error
 import tarfile
 import shutil
+import xml.etree.ElementTree as ET
 
 from pathlib import Path
 from tqdm import tqdm
@@ -15,6 +16,13 @@ from tqdm import tqdm
 VOC_TRAIN_URL = "http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar"
 VOC_TEST_URL = "http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOC2012test.tar"
 
+# Class order defines the class index written into the YOLO label files
+VOC_CLASSES = [
+    "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat",
+    "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person",
+    "pottedplant", "sheep", "sofa", "train", "tvmonitor",
+]
+
 # Progress bar shows percentage, size, elapsed time, TIME REMAINING and speed
 BAR_FORMAT = ("{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} "
               "[elapsed {elapsed} | remaining {remaining} | {rate_fmt}]")
@@ -22,33 +30,68 @@ BAR_FORMAT = ("{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} "
 
 def init():
     """Parse command line arguments"""
-    parser = argparse.ArgumentParser(
-        description="YOLO V1 Dataset Preparation Script",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  python create_dataset.py --voc_root ./data/VOCdevkit/VOC2012 --output_dir ./data/csv
-  python create_dataset.py --voc_root ./data/VOCdevkit/VOC2012 --output_dir ./data/csv --no_download
-  python create_dataset.py --voc_root ./data/VOCdevkit/VOC2012 --output_dir ./data/csv --no_validate
-""")
+    parser = argparse.ArgumentParser(description="YOLO V1 Dataset Preparation Script", formatter_class=argparse.RawDescriptionHelpFormatter,
+    epilog="""
+            Examples:
+            # Everything: download (if missing) -> convert XML to YOLO txt -> create CSVs
+            python create_dataset.py --voc_root ./data/VOCdevkit/VOC2012 --output_dir ./data/csv
 
-    parser.add_argument('--voc_root', type=str, required=True,
+            # Separate steps
+            python create_dataset.py --voc_root ./data --download_only
+            python create_dataset.py --voc_root ./data/VOCdevkit/VOC2012 --convert_only
+            python create_dataset.py --voc_root ./data/VOCdevkit/VOC2012 --output_dir ./data/csv --csv_only
+
+            # Other options
+            python create_dataset.py --voc_root ./data/VOCdevkit/VOC2012 --output_dir ./data/csv --no_download
+            python create_dataset.py --voc_root ./data/VOCdevkit/VOC2012 --output_dir ./data/csv --no_validate
+            python create_dataset.py --voc_root ./data/VOCdevkit/VOC2012 --convert_only --label_dir ./data/labels --overwrite_labels
+    """)
+    parser.add_argument('--voc_root', 
+                        type=str, 
+                        required=True,
                         help='Path to VOC2012 folder (e.g., ./data/VOCdevkit/VOC2012) or root folder (e.g., ./data)')
-    parser.add_argument('--output_dir', type=str, default='./data',
+    
+    parser.add_argument('--output_dir', 
+                        type=str, 
+                        default='./data',
                         help='Output directory for CSV files (default: ./data)')
-    parser.add_argument('--no_download', action='store_true',
+
+    parser.add_argument('--label_dir',
+                        type=str,
+                        default=None,
+                        help='Output directory for YOLO .txt labels (default: <voc_root>/labels)')
+    
+    parser.add_argument('--no_download', 
+                        action='store_true',
                         help='Skip downloading dataset if not found')
-    parser.add_argument('--no_validate', action='store_true',
+    
+    parser.add_argument('--no_validate', 
+                        action='store_true',
                         help='Skip validation of dataset structure')
-    parser.add_argument('--download_only', action='store_true',
-                        help="Only download dataset, don't create CSV files")
+
+    parser.add_argument('--no_convert',
+                        action='store_true',
+                        help='Skip XML -> YOLO txt label conversion in the full run')
+
+    parser.add_argument('--overwrite_labels',
+                        action='store_true',
+                        help='Re-create label .txt files that already exist (default: skip existing)')
+
+    # Run a single step on its own (only one of these can be used at a time)
+    step = parser.add_mutually_exclusive_group()
+    step.add_argument('--download_only', 
+                      action='store_true',
+                      help="Only download dataset, don't convert labels or create CSV files")
+    step.add_argument('--convert_only',
+                      action='store_true',
+                      help="Only convert XML annotations to YOLO .txt labels (no CSV files)")
+    step.add_argument('--csv_only',
+                      action='store_true',
+                      help="Only create the CSV files (no label conversion)")
     return parser.parse_args()
 
 
-# ----------------------------------------------------------------------------
 # Downloading (resume + retry + ETA)
-# ----------------------------------------------------------------------------
-
 def get_remote_size(url):
     """Return file size in bytes from a HEAD request, or None if unknown."""
     try:
@@ -224,10 +267,79 @@ def download_voc_dataset(output_dir="./data"):
     return voc_root
 
 
-# ----------------------------------------------------------------------------
-# Dataset validation / path helpers
-# ----------------------------------------------------------------------------
+# XML -> YOLO label conversion
+def convert_xml_to_yolo(voc_root_path, label_dir=None, overwrite=False):
+    """
+    Convert Pascal VOC XML annotations into YOLO-format .txt files.
 
+    Each output line is:  class_index x_center y_center width height
+    with all four box values normalized to 0-1 (what dataset.py expects).
+
+    Args:
+        voc_root_path: Path to the VOC2012 folder (must contain Annotations/)
+        label_dir: Where to write the .txt files (default: <voc_root>/labels)
+        overwrite: Re-create files that already exist (default: skip them)
+
+    Returns:
+        Path to the label directory.
+    """
+    voc_root = Path(voc_root_path)
+    ann_dir = voc_root / "Annotations"
+    if not ann_dir.exists():
+        raise FileNotFoundError(f"Annotations folder not found at {ann_dir}")
+
+    label_dir = Path(label_dir) if label_dir else voc_root / "labels"
+    label_dir.mkdir(parents=True, exist_ok=True)
+
+    xml_files = sorted(ann_dir.glob("*.xml"))
+    converted = skipped = failed = 0
+
+    bar = tqdm(xml_files, desc="Converting XML -> YOLO txt", unit="file",
+               bar_format=BAR_FORMAT, smoothing=0.05)
+    for xml_path in bar:
+        bar.set_postfix(converted=converted, skipped=skipped, failed=failed)
+        out_path = label_dir / f"{xml_path.stem}.txt"
+        if out_path.exists() and not overwrite:
+            skipped += 1
+            continue
+
+        try:
+            root = ET.parse(xml_path).getroot()
+            W = float(root.find("size/width").text)
+            H = float(root.find("size/height").text)
+            if W <= 0 or H <= 0:
+                raise ValueError(f"invalid image size {W}x{H}")
+
+            lines = []
+            for obj in root.iter("object"):
+                cls = obj.find("name").text.strip()
+                if cls not in VOC_CLASSES:
+                    continue
+                bb = obj.find("bndbox")
+                xmin, ymin = float(bb.find("xmin").text), float(bb.find("ymin").text)
+                xmax, ymax = float(bb.find("xmax").text), float(bb.find("ymax").text)
+
+                x_center = (xmin + xmax) / 2 / W
+                y_center = (ymin + ymax) / 2 / H
+                width = (xmax - xmin) / W
+                height = (ymax - ymin) / H
+                lines.append(f"{VOC_CLASSES.index(cls)} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}")
+
+            with open(out_path, "w") as f:
+                f.write("\n".join(lines))
+            converted += 1
+
+        except (ET.ParseError, AttributeError, ValueError) as e:
+            failed += 1
+            tqdm.write(f"Warning: could not convert {xml_path.name}: {e}")
+    bar.set_postfix(converted=converted, skipped=skipped, failed=failed)
+    bar.close()
+
+    print(f"Labels: {converted} converted, {skipped} already existed, {failed} failed -> {label_dir}")
+    return label_dir
+
+
+# Dataset validation / path helpers
 def validate_voc_dataset(voc_root_path):
     """Validate that the VOC dataset is properly structured"""
     for dir_name in ['Annotations', 'ImageSets', 'JPEGImages']:
@@ -304,11 +416,8 @@ def safe_delete_directory(path):
         return False
 
 
-# ----------------------------------------------------------------------------
-# Main pipeline
-# ----------------------------------------------------------------------------
-
-def run(voc_root_path, output_dir, download=True, validate=True):
+def run(voc_root_path, output_dir, download=True, validate=True,
+        convert=True, make_csv=True, label_dir=None, overwrite_labels=False):
     """
     Prepare Pascal VOC dataset for YOLO training
 
@@ -317,6 +426,10 @@ def run(voc_root_path, output_dir, download=True, validate=True):
         output_dir: Where to save CSV files
         download: Whether to download dataset if not found
         validate: Whether to validate dataset structure
+        convert: Whether to convert XML annotations to YOLO .txt labels
+        make_csv: Whether to create the CSV files
+        label_dir: Where to write .txt labels (default: <voc_root>/labels)
+        overwrite_labels: Re-create label files that already exist
     """
     original_path = Path(voc_root_path)
     voc_root = find_voc_root(voc_root_path)
@@ -352,6 +465,13 @@ def run(voc_root_path, output_dir, download=True, validate=True):
             else:
                 raise
 
+    if convert:
+        label_dir = convert_xml_to_yolo(voc_root_path, label_dir, overwrite=overwrite_labels)
+        print(f"Set label_dir in your train config to: {label_dir}")
+
+    if not make_csv:
+        return
+
     os.makedirs(output_dir, exist_ok=True)
 
     splits = {'train': 'train.txt', 'val': 'val.txt', 'test': 'test.txt'}
@@ -375,7 +495,9 @@ def run(voc_root_path, output_dir, download=True, validate=True):
             print(f"Warning: No images found in {split_file}. Skipping {split_name} split.")
             continue
 
-        entries = [[f"{name}.jpg", f"{name}.txt"] for name in image_names]
+        entries = [[f"{name}.jpg", f"{name}.txt"]
+                   for name in tqdm(image_names, desc=f"Building {split_name}.csv",
+                                    unit="img", bar_format=BAR_FORMAT)]
 
         csv_path = Path(output_dir) / f"{split_name}.csv"
         with open(csv_path, 'w', newline='') as csvfile:
@@ -415,4 +537,8 @@ if __name__ == "__main__":
     run(voc_root_path=args.voc_root,
         output_dir=args.output_dir,
         download=not args.no_download,
-        validate=not args.no_validate)
+        validate=not args.no_validate,
+        convert=not args.no_convert and not args.csv_only,
+        make_csv=not args.convert_only,
+        label_dir=args.label_dir,
+        overwrite_labels=args.overwrite_labels)
