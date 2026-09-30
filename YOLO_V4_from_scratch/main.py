@@ -142,7 +142,7 @@ def init():
                            else yaml_config.get('load_model_file'),
         'multi_scale': args.multi_scale if args.multi_scale is not None
                        else yaml_config.get('multi_scale', True),
-        'test_path': yaml_config.get('test_path'),
+        'val_path': yaml_config.get('val_path'),
         'train_path': yaml_config.get('train_path'),
         'weight_decay': yaml_config.get('weight_decay'),
         'pin_memory': yaml_config.get('pin_memory'),
@@ -178,7 +178,7 @@ def main(img_dir: str,
          load_model: bool,
          load_model_file: str,
          train_path: str,
-         test_path: str,
+         val_path: str,
          weight_decay: float,
          pin_memory: bool,
          multi_scale: bool):
@@ -211,7 +211,7 @@ def main(img_dir: str,
         label_dir=label_dir
     )
     test_dataset = VOCDataset(
-        csv_file=test_path,
+        csv_file=val_path,
         transform=transform,
         img_dir=img_dir,
         label_dir=label_dir
@@ -284,7 +284,7 @@ if __name__ == "__main__":
         seed=args.seed,
         load_model=args.load_model,
         load_model_file=args.load_model_file,
-        test_path=args.test_path,
+        val_path=args.val_path,
         train_path=args.train_path,
         weight_decay=args.weight_decay,
         pin_memory=args.pin_memory,
